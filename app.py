@@ -54,3 +54,31 @@ def show_user_details(user_id):
         'user_details.html',
         user=user
     )
+
+@app.get('/users/<user_id>/edit')
+def show_edit_form(user_id):
+    user = User.query.get(user_id)
+    return render_template("user_edit.html", user=user)
+
+@app.post('/users/<user_id>/edit')
+def handle_edit_form(user_id):
+    print("running hanle edit form")
+    user = User.query.get(user_id)
+    user.first_name = request.form["first_name"]
+    user.last_name = request.form["last_name"]
+    user.image_url = request.form["image_url"]
+    db.session.add(user)
+    db.session.commit()
+
+    return redirect('/users')
+
+@app.post('/users/<user_id>/delete')
+def handle_delete_user(user_id):
+    user = User.query.get(user_id)
+    db.session.delete(user)
+    db.session.commit()
+
+    return redirect('/users')
+
+
+
