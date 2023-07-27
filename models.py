@@ -16,6 +16,8 @@ def connect_db(app):
 class User(db.Model):
     """Create User class, handle users table"""
 
+    # User.posts to return a list of posts by the user
+
     __tablename__ = "users"
 
     id = db.Column(
@@ -44,6 +46,8 @@ class User(db.Model):
 class Post(db.Model):
     """Create Post class, handle new post"""
 
+    __tablename__ = "posts"
+
     id = db.Column(
         db.Integer,
         primary_key=True,
@@ -69,3 +73,5 @@ class Post(db.Model):
     user_id = db.Column(
         db.ForeignKey('users.id')
     )
+
+    user = db.relationship('User', backref='posts')
