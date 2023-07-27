@@ -1,11 +1,10 @@
+from models import DEFAULT_IMAGE_URL, User, Post
+from app import app, db
+from unittest import TestCase
 import os
 
 os.environ["DATABASE_URL"] = "postgresql:///blogly_test"
 
-from unittest import TestCase
-
-from app import app, db
-from models import DEFAULT_IMAGE_URL, User
 
 # Make Flask errors be real errors, rather than HTML pages with error info
 app.config['TESTING'] = True
@@ -40,7 +39,15 @@ class UserViewTestCase(TestCase):
             image_url=None,
         )
 
+        test_post = Post(
+            title="test1_title",
+            content="test1_content",
+            user_id=test_user.id
+
+        )
+
         db.session.add(test_user)
+        db.session.add(test_post)
         db.session.commit()
 
         # We can hold onto our test_user's id by attaching it to self (which is
@@ -48,11 +55,11 @@ class UserViewTestCase(TestCase):
         # rely on this user in our tests without needing to know the numeric
         # value of their id, since it will change each time our tests are run.
         self.user_id = test_user.id
+        self.post_id = test_post.id
 
     def tearDown(self):
         """Clean up any fouled transaction."""
         db.session.rollback()
-
 
     def test_show_homepage(self):
         """Should redirect to /users"""
@@ -70,40 +77,71 @@ class UserViewTestCase(TestCase):
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn("***User List***", html) # be more specific
+            self.assertIn("***User List***", html)  # be more specific
 
     def test_handle_add_user_form(self):
-        #check if new user appears on user list
+        # check if new user appears on user list
         """Should connect and submit data to the database"""
         print('\n\n***TEST 3***\n\n')
         with self.client as c:
             resp = c.post(
                 '/users/new',
-                data = {'first_name':'Stuart',
-                        'last_name':"Fleisher",
-                        'image_url': ""
-                },
+                data={'first_name': 'Stuart',
+                      'last_name': "Fleisher",
+                      'image_url': ""
+                      },
                 follow_redirects=True)
             html = resp.get_data(as_text=True)
 
             user_count = User.query.count()
-            self.assertEqual(resp.status_code,200)
+            self.assertEqual(resp.status_code, 200)
             self.assertTrue(user_count > 1)
             self.assertIn("Stuar", html)
 
     def test_delete_user(self):
         """Test if a user has been deleted from database"""
         with self.client as c:
-            resp = c.post(f'/users/{self.user_id}/delete', follow_redirects=True)
+            resp = c.post(f'/users/{self.user_id}/delete',
+                          follow_redirects=True)
             html = resp.get_data(as_text=True)
             user_count = User.query.count()
-            
-            self.assertEqual(resp.status_code,200)
+
+            self.assertEqual(resp.status_code, 200)
             self.assertTrue(user_count == 0)
             self.assertNotIn("test1_first", html)
 
+    def test_show_post(self):
+        """Should load the post page"""
+        with self.client as c:
+            resp = c.get(f'/posts/{self.post_id}')
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("test1_content", html)
+
+    def test_add_post(self):
+        """Should add new a post and redirect"""
+        with self.client as c:
+            resp = c.post(
+                f'/users/{self.user_id}/posts/new',
+                data={
+                    'title': 'test2_title',
+                    'content': 'test2_content'
+                },
+                follow_redirects=True
+            )
+            html = resp.get_data(as_text=True)
+            post_count = Post.query.count()
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertTrue(post_count > 1)
+            self.assertIn("test2_title", html)
 
 
 
+    def test_edit_post(self):
+        """Should update the post from form and redirect"""
+        
 
-
+    def test_delete_post(self):
+        """Should delete the post and redirect"""

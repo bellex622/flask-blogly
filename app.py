@@ -131,23 +131,47 @@ def handle_add_post_form(user_id):
 @app.get('/posts/<int:post_id>')
 def show_post(post_id):
     """Shows a post"""
-    ...
-    # Show buttons to edit and delete the post.
+
+    post = Post.query.get_or_404(post_id)
+    user = post.user
+
+    return render_template("post.html", post=post, user=user)
+
+
 
 @app.get('/posts/<int:post_id>/edit')
 def show_edit_post_form(post_id):
     """Show form to edit a post, and to cancel (back to user page)."""
-    ...
+    post = Post.query.get_or_404(post_id)
+    user = post.user
+
+    return render_template("post_edit.html", post=post, user=user)
 
 @app.post('/posts/<int:post_id>/edit')
 def handle_edit_post_form(post_id):
     """Handle editing of a post. Redirect back to the post view."""
-    ...
+    post = Post.query.get_or_404(post_id)
+    post.title = request.form["title"]
+    post.content = request.form["content"]
+
+    db.session.commit()
+
+    return redirect(f'/posts/{post.id}')
+
 
 
 @app.post('/posts/<int:post_id>/delete')
 def delete_post(post_id):
     """Delete the post"""
+
+    post = Post.query.get_or_404(post_id)
+    user = post.user
+    db.session.delete(post)
+    db.session.commit()
+
+    return redirect(f"/users/{user.id}")
+
+
 
 
 
