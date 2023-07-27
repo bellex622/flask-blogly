@@ -61,6 +61,9 @@ class UserViewTestCase(TestCase):
         """Clean up any fouled transaction."""
         db.session.rollback()
 
+
+    ############################ USER TESTS ###################################
+
     def test_show_homepage(self):
         """Should redirect to /users"""
         print('\n\n***TEST 1***\n\n')
@@ -78,6 +81,7 @@ class UserViewTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn("***User List***", html)  # be more specific
+
 
     def test_handle_add_user_form(self):
         # check if new user appears on user list
@@ -100,6 +104,9 @@ class UserViewTestCase(TestCase):
 
     def test_delete_user(self):
         """Test if a user has been deleted from database"""
+
+        print('\n\n***USER TEST 4***\n\n')
+
         with self.client as c:
             resp = c.post(f'/users/{self.user_id}/delete',
                           follow_redirects=True)
@@ -110,8 +117,14 @@ class UserViewTestCase(TestCase):
             self.assertTrue(user_count == 0)
             self.assertNotIn("test1_first", html)
 
+
+    ############################ POST TESTS ###################################
+
+
     def test_show_post(self):
         """Should load the post page"""
+
+        print('\n\n***POST TEST 1***\n\n')
         with self.client as c:
             resp = c.get(f'/posts/{self.post_id}')
             html = resp.get_data(as_text=True)
@@ -121,6 +134,8 @@ class UserViewTestCase(TestCase):
 
     def test_add_post(self):
         """Should add new a post and redirect"""
+
+        print('\n\n***POST TEST 2***\n\n')
         with self.client as c:
             resp = c.post(
                 f'/users/{self.user_id}/posts/new',
@@ -141,7 +156,34 @@ class UserViewTestCase(TestCase):
 
     def test_edit_post(self):
         """Should update the post from form and redirect"""
-        
+
+        print('\n\n***POST TEST 3***\n\n')
+        with self.client as c:
+            resp = c.post(
+                f'/posts/{self.post_id}/edit',
+                data={
+                    'title': 'new_title',
+                    'content': 'new_content'
+                },
+                follow_redirects=True
+            )
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("new_title", html)
+            self.assertIn("new_content", html)
+
 
     def test_delete_post(self):
         """Should delete the post and redirect"""
+
+        print('\n\n***POST TEST 4***\n\n')
+        with self.client as c:
+            resp = c.post(f'/post/{self.post_id}/delete',
+                            follow_redirects=True)
+            html = resp.get_data(as_text=True)
+            post_count = Post.query.count()
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertTrue(post_count == 0)
+            self.assertNotIn("test1_title", html)
