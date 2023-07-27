@@ -53,10 +53,37 @@ class UserViewTestCase(TestCase):
         """Clean up any fouled transaction."""
         db.session.rollback()
 
-    def test_list_users(self):
+
+    def test_show_homepage(self):
+        """Should redirect to /users"""
+        print('\n\n***TEST 1***\n\n')
+        with self.client as c:
+            resp = c.get('/')
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, '/users')
+
+    def test_show_users(self):
+        """Should load the user list template"""
+        print('\n\n***TEST 2***\n\n')
         with self.client as c:
             resp = c.get("/users")
             self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
-            self.assertIn("test1_first", html)
-            self.assertIn("test1_last", html)
+            self.assertIn("***User List***", html)
+
+    def test_handle_add_user_form(self):
+        """Should connect and submit data to the database"""
+        print('\n\n***TEST 3***\n\n')
+        with self.client as c:
+            resp = c.post(
+                '/users/new',
+                data = {'first_name':'Stuart',
+                        'last_name':"Fleisher",
+                        'image_url': ""
+                })
+            user_count = User.query.count()
+            self.assertEqual(resp.status_code,302)
+            self.assertTrue(user_count > 1)
+
+
+

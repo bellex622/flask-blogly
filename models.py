@@ -1,6 +1,7 @@
 """Models for Blogly."""
 from flask_sqlalchemy import SQLAlchemy
 
+DEFAULT_IMAGE_URL = 'https://placekitten.com/200/300'
 db = SQLAlchemy()
 
 def connect_db(app):
@@ -33,7 +34,7 @@ class User(db.Model):
     image_url = db.Column(
                 db.String(100),
                 nullable=False,
-                default = 'https://placekitten.com/200/300'
+                default = DEFAULT_IMAGE_URL
 
     )
 
