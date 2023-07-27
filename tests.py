@@ -67,11 +67,13 @@ class UserViewTestCase(TestCase):
         print('\n\n***TEST 2***\n\n')
         with self.client as c:
             resp = c.get("/users")
-            self.assertEqual(resp.status_code, 200)
             html = resp.get_data(as_text=True)
-            self.assertIn("***User List***", html)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("***User List***", html) # be more specific
 
     def test_handle_add_user_form(self):
+        #check if new user appears on user list
         """Should connect and submit data to the database"""
         print('\n\n***TEST 3***\n\n')
         with self.client as c:
@@ -80,10 +82,28 @@ class UserViewTestCase(TestCase):
                 data = {'first_name':'Stuart',
                         'last_name':"Fleisher",
                         'image_url': ""
-                })
+                },
+                follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
             user_count = User.query.count()
-            self.assertEqual(resp.status_code,302)
+            self.assertEqual(resp.status_code,200)
             self.assertTrue(user_count > 1)
+            self.assertIn("Stuar", html)
+
+    def test_delete_user(self):
+        """Test if a user has been deleted from database"""
+        with self.client as c:
+            resp = c.post(f'/users/{self.user_id}/delete', follow_redirects=True)
+            html = resp.get_data(as_text=True)
+            user_count = User.query.count()
+            
+            self.assertEqual(resp.status_code,200)
+            self.assertTrue(user_count == 0)
+            self.assertNotIn("test1_first", html)
+
+
+
 
 
 

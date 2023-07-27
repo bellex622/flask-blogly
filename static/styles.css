@@ -1,0 +1,22 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  box-sizing: border-box;
+
+}
+
+button {
+  padding: 7px;
+  background-color: rgb(68, 89, 195);
+  color: aliceblue;
+  font-size: 15px;
+  border: none;
+  border-radius: 7px;
+
+}
+
+.form_input {
+  margin-top: 5px;
+
+
+}
