@@ -21,6 +21,10 @@ def start():
 
     return redirect('/users')
 
+
+############################## USER ROUTES ####################################
+
+
 @app.get('/users')
 def show_users():
     """show user list page"""
@@ -29,11 +33,13 @@ def show_users():
     print("\n\n****","users:", users)
     return render_template('user_list.html',users=users)
 
+
 @app.get('/users/new')
 def display_add_user_form():
     """show the add user form"""
 
     return render_template('new_user.html')
+
 
 @app.post('/users/new')
 def handle_add_user_form():
@@ -56,6 +62,7 @@ def handle_add_user_form():
 
     return redirect('/users')
 
+
 @app.get('/users/<int:user_id>')
 def show_user_details(user_id):
     """show user details page"""
@@ -69,12 +76,14 @@ def show_user_details(user_id):
         posts=posts
     )
 
+
 @app.get('/users/<int:user_id>/edit')
 def show_edit_form(user_id):
     """show the user edit form"""
 
     user = User.query.get_or_404(user_id)
     return render_template("user_edit.html", user=user)
+
 
 @app.post('/users/<int:user_id>/edit')
 def handle_edit_form(user_id):
@@ -89,16 +98,20 @@ def handle_edit_form(user_id):
 
     return redirect('/users')
 
+
 @app.post('/users/<int:user_id>/delete')
 def handle_delete_user(user_id):
     """delete the user from database, and redirect to users list"""
 
     user = User.query.get_or_404(user_id)
+    # TODO: delete user posts
     db.session.delete(user)
     db.session.commit()
 
     return redirect('/users')
 
+
+############################## POST ROUTES ####################################
 
 @app.get('/users/<int:user_id>/posts/new')
 def show_new_post_form(user_id):
@@ -114,7 +127,8 @@ def show_new_post_form(user_id):
 @app.post('/users/<int:user_id>/posts/new')
 def handle_add_post_form(user_id):
     """ Handle add form; add post and redirect to the user detail page."""
-    ...
+
+    # validate that user exists
     title = request.form['title']
     content = request.form['content']
     post = Post(
@@ -122,6 +136,7 @@ def handle_add_post_form(user_id):
         content=content,
         user_id=user_id
     )
+
     db.session.add(post)
     db.session.commit()
 
@@ -142,14 +157,18 @@ def show_post(post_id):
 @app.get('/posts/<int:post_id>/edit')
 def show_edit_post_form(post_id):
     """Show form to edit a post, and to cancel (back to user page)."""
+
     post = Post.query.get_or_404(post_id)
     user = post.user
 
     return render_template("post_edit.html", post=post, user=user)
 
+
+
 @app.post('/posts/<int:post_id>/edit')
 def handle_edit_post_form(post_id):
     """Handle editing of a post. Redirect back to the post view."""
+
     post = Post.query.get_or_404(post_id)
     post.title = request.form["title"]
     post.content = request.form["content"]
@@ -165,7 +184,9 @@ def delete_post(post_id):
     """Delete the post"""
 
     post = Post.query.get_or_404(post_id)
+    print("\n\n***","post",post.id,"\n\n")
     user = post.user
+    print("\n\n***","user",user,"\n\n")
     db.session.delete(post)
     db.session.commit()
 
@@ -175,18 +196,6 @@ def delete_post(post_id):
 
 
 
-
-# TODO add post creation to seed file
-
-# TODO create add post method
-
-# TODO Update user page to show posts and have add post button
-
-# TODO create add post form with cancel/add buttons
-
-# TODO create post detail page with cancel, edit, delete functionality
-
-# TODO create edit post form with cancel button
 
 
 

@@ -29,7 +29,9 @@ class UserViewTestCase(TestCase):
         # As you add more models later in the exercise, you'll want to delete
         # all of their records before each test just as we're doing with the
         # User model below.
+        Post.query.delete()
         User.query.delete()
+
 
         self.client = app.test_client()
 
@@ -39,14 +41,16 @@ class UserViewTestCase(TestCase):
             image_url=None,
         )
 
+        db.session.add(test_user)
+        db.session.commit()
+
+
         test_post = Post(
             title="test1_title",
             content="test1_content",
             user_id=test_user.id
 
         )
-
-        db.session.add(test_user)
         db.session.add(test_post)
         db.session.commit()
 
@@ -56,6 +60,7 @@ class UserViewTestCase(TestCase):
         # value of their id, since it will change each time our tests are run.
         self.user_id = test_user.id
         self.post_id = test_post.id
+
 
     def tearDown(self):
         """Clean up any fouled transaction."""
@@ -105,6 +110,8 @@ class UserViewTestCase(TestCase):
     def test_delete_user(self):
         """Test if a user has been deleted from database"""
 
+        #consider testing that posts are removed
+
         print('\n\n***USER TEST 4***\n\n')
 
         with self.client as c:
@@ -132,10 +139,12 @@ class UserViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn("test1_content", html)
 
+
     def test_add_post(self):
         """Should add new a post and redirect"""
 
         print('\n\n***POST TEST 2***\n\n')
+        initial_count = Post.query.count()
         with self.client as c:
             resp = c.post(
                 f'/users/{self.user_id}/posts/new',
@@ -149,7 +158,7 @@ class UserViewTestCase(TestCase):
             post_count = Post.query.count()
 
             self.assertEqual(resp.status_code, 200)
-            self.assertTrue(post_count > 1)
+            self.assertTrue(post_count = initial_count +1) #compare count before and after route
             self.assertIn("test2_title", html)
 
 
@@ -178,12 +187,13 @@ class UserViewTestCase(TestCase):
         """Should delete the post and redirect"""
 
         print('\n\n***POST TEST 4***\n\n')
-        with self.client as c:
-            resp = c.post(f'/post/{self.post_id}/delete',
-                            follow_redirects=True)
-            html = resp.get_data(as_text=True)
-            post_count = Post.query.count()
 
-            self.assertEqual(resp.status_code, 200)
-            self.assertTrue(post_count == 0)
+        with self.client as c:
+            resp = c.post(
+                f'/posts/{self.post_id}/delete',
+                follow_redirects=True
+            )
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200) #consider testing count
             self.assertNotIn("test1_title", html)

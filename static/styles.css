@@ -5,7 +5,7 @@ body {
 
 }
 
-button {
+button, .fake-button {
   padding: 7px;
   background-color: rgb(68, 89, 195);
   color: aliceblue;
